@@ -6,13 +6,31 @@ package frc.robot;
 
 import frc.robot.Constants.CANConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.Constants.SystemConstants;
+import frc.robot.Constants.SystemConstants.RobotMode;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.Elastic;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.drum.DrumIODisabled;
+import frc.robot.subsystems.drum.DrumIOKraken;
+import frc.robot.subsystems.drum.DrumSubsystem;
+import frc.robot.subsystems.elevator.ElevatorIODisabled;
+import frc.robot.subsystems.elevator.ElevatorIOKraken;
+import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.subsystems.grabber.GrabberIODisabled;
+import frc.robot.subsystems.grabber.GrabberIOKraken;
+import frc.robot.subsystems.grabber.GrabberSubsystem;
+import frc.robot.subsystems.indexer.IndexerIODisabled;
+import frc.robot.subsystems.indexer.IndexerIOKraken;
+import frc.robot.subsystems.indexer.IndexerSubsystem;
+import frc.robot.subsystems.intake.IntakeIODisabled;
+import frc.robot.subsystems.intake.IntakeIOKraken;
+import frc.robot.subsystems.intake.IntakeSubsystem;
 import lib.hardware.hid.SamuraiXboxController;
 
 import com.ctre.phoenix6.CANBus.CANBusStatus;
 
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.Timer;
@@ -31,6 +49,12 @@ public class RobotContainer {
     // The robot's subsystems and commands are defined here...
     private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
 
+    private final GrabberSubsystem m_grabber;
+    private final ElevatorSubsystem m_elevator;
+    private final IntakeSubsystem m_intake;
+    private final IndexerSubsystem m_indexer;
+    private final DrumSubsystem m_drum;
+
     private final Elastic m_elastic;
 
     // Controllers
@@ -41,6 +65,21 @@ public class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
+        if (SystemConstants.kMode == RobotMode.REAL || RobotBase.isReal()) {
+            // The robot is real! Use the real IO layers
+            m_grabber = new GrabberSubsystem(new GrabberIOKraken());
+            m_elevator = new ElevatorSubsystem(new ElevatorIOKraken());
+            m_intake = new IntakeSubsystem(new IntakeIOKraken());
+            m_indexer = new IndexerSubsystem(new IndexerIOKraken());
+            m_drum = new DrumSubsystem(new DrumIOKraken());
+        } else {
+            // The robot is not real. Use the disabled IO layers
+            m_grabber = new GrabberSubsystem(new GrabberIODisabled());
+            m_elevator = new ElevatorSubsystem(new ElevatorIODisabled());
+            m_intake = new IntakeSubsystem(new IntakeIODisabled());
+            m_indexer = new IndexerSubsystem(new IndexerIODisabled());
+            m_drum = new DrumSubsystem(new DrumIODisabled());
+        }
 
         m_elastic = new Elastic();
 

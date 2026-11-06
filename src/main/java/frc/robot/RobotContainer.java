@@ -6,14 +6,23 @@ package frc.robot;
 
 import frc.robot.Constants.CANConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.Constants.SystemConstants;
+import frc.robot.Constants.SystemConstants.RobotMode;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.drive.TeleopDriveCommand;
 import frc.robot.subsystems.Elastic;
-import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.drive.DriveIOHardware;
+import frc.robot.subsystems.drive.DriveIOSim;
+import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.drive.TunerConstants;
+import lib.hardware.hid.SamuraiPS5Controller;
 import lib.hardware.hid.SamuraiXboxController;
+import lib.vision.VisionLocalizationSystem;
 
 import com.ctre.phoenix6.CANBus.CANBusStatus;
 
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -29,20 +38,48 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
     // The robot's subsystems and commands are defined here...
-    private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+    private final DriveSubsystem m_drive;
+
+    private final VisionLocalizationSystem m_vision;
 
     private final Elastic m_elastic;
 
+    // Command for the driver
+    TeleopDriveCommand teleopDriveCommand;
+
     // Controllers
-    private final SamuraiXboxController m_driverController =
-        new SamuraiXboxController(OIConstants.kDriverControllerPort);
+    private final SamuraiPS5Controller m_driverController =
+        new SamuraiPS5Controller(OIConstants.kDriverControllerPort);
     private final SamuraiXboxController m_operatorController = 
         new SamuraiXboxController(OIConstants.kOperatorControllerPort);
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
-
+        m_vision = new VisionLocalizationSystem();
         m_elastic = new Elastic();
+
+        if (SystemConstants.kMode == RobotMode.REAL || RobotBase.isReal()) {
+            // The robot is real! Use the real IO layers
+            m_drive = new DriveSubsystem(
+                new DriveIOHardware(TunerConstants.createDrivetrain()),
+                m_vision,
+                m_elastic
+            );
+        } else {
+            // The robot is not real. Use the disabled or simulation IO layers
+            m_drive = new DriveSubsystem(
+                new DriveIOSim(TunerConstants.createDrivetrain()),
+                m_vision,
+                m_elastic
+            );
+        }
+
+        teleopDriveCommand = new TeleopDriveCommand(
+            m_drive,
+            () -> -m_driverController.getLeftY(),
+            () -> -m_driverController.getLeftX(),
+            () -> -m_driverController.getRightX()
+        );
 
         // Set the alliance color
         setAlliance(m_elastic.getSelectedTeamColor());
@@ -65,14 +102,6 @@ public class RobotContainer {
      * joysticks}.
      */
     private void configureBindings() {
-        // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-        new Trigger(m_exampleSubsystem::exampleCondition)
-                .onTrue(new ExampleCommand(m_exampleSubsystem));
-
-        // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-        // cancelling on release.
-        m_operatorController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
-
         // Update alliance from Elastic
         new Trigger(() -> m_elastic.getSelectedTeamColor() == Alliance.Blue)
             .onTrue(Commands.runOnce(() -> setAlliance(Alliance.Blue)).ignoringDisable(true));
@@ -82,7 +111,24 @@ public class RobotContainer {
 
     /** Bind triggers on driver controller to commands */
     private void configureDriverBindings() {
+        m_drive.setDefaultCommand(teleopDriveCommand);
 
+        // Single clutch
+        m_driverController.R1().and(m_driverController.R2().negate())
+            .whileTrue(teleopDriveCommand.applySingleClutch());
+
+        m_driverController.R2()
+            .whileTrue(teleopDriveCommand.applyDoubleClutch());
+
+        // Brake
+        m_driverController.L3().or(m_driverController.R3())
+            .whileTrue(teleopDriveCommand.applySwerveBrake());
+
+        // Reset the heading of the gyro
+        m_driverController.create()
+            .onTrue(Commands.runOnce(() ->
+                m_drive.resetHeading()
+            ));
     }
 
     /** Bind triggers on operator controller to commands */

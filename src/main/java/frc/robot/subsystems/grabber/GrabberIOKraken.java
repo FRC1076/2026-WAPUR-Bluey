@@ -81,7 +81,7 @@ public class GrabberIOKraken implements GrabberIO {
 
         m_rightVoltageRequest = new VoltageOut(0).withEnableFOC(GrabberConstants.kUseFOC);
         m_leftVoltageRequest = new VoltageOut(0).withEnableFOC(GrabberConstants.kUseFOC);
-        m
+        
         
 
     

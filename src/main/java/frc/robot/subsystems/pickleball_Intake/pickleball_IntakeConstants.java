@@ -24,7 +24,7 @@ public class pickleball_IntakeConstants{
     public static final double kSupplyCurrentLimit = 40;
     public static final double kStatorCurrentLimit = 70;
     public static final double kGearRatio = 1;
-    public static final InvertedValue kInvertedValue = InvertedValue.CounterClockwise_Positive
+    public static final InvertedValue kInvertedValue = InvertedValue.CounterClockwise_Positive;
     
     public static final boolean kUseFOC = true;
 

@@ -1,10 +1,11 @@
 
 package frc.robot.subsystems.pickleball_Intake;
 
+import org.littletonrobotics.junction.AutoLog;
+
 interface pickleball_IntakeIO {
-
+    @AutoLog
     public class pickleball_IntakeIOInputs {
-
         public double appliedVolts;
         public double postion;
         public double RPS;

@@ -64,7 +64,6 @@ public class pickleball_IntakeIOKraken implements pickleball_IntakeIO {
 
     @Override
     public void setRPS(double RadsPerSec){
-        m_motor.setControl(m_velocityRequest.withVelocity(RadiansPerSecond.of(RadiansPerSecond)));
+        m_motor.setControl(m_velocityRequest.withVelocity(RadiansPerSecond.of(RadsPerSec)));
     }
-
 }

@@ -113,16 +113,46 @@ public class RobotContainer {
     private void configureDriverBindings() {
         m_drive.setDefaultCommand(teleopDriveCommand);
 
-        // Single clutch
-        m_driverController.R1().and(m_driverController.R2().negate())
-            .whileTrue(teleopDriveCommand.applySingleClutch());
-
-        m_driverController.R2()
-            .whileTrue(teleopDriveCommand.applyDoubleClutch());
-
         // Brake
         m_driverController.L3().or(m_driverController.R3())
             .whileTrue(teleopDriveCommand.applySwerveBrake());
+
+        // Pickeball Controls
+            m_driverController.povUp()
+            .onTrue() //pickeball shooter on
+            .onFalse(); //pickeball shooter off
+            
+        m_driverController.povDown()
+            .onTrue() //pickleball intake on
+            .onFalse(); //pickeball intake off
+
+        // Elevator Controls
+            m_driverController.cross()
+            .onTrue(); //elevator level 1
+        
+        m_driverController.circle()
+            .onTrue(); //elevator level 2 
+
+        m_driverController.square()
+            .onTrue(); //elevator level 3
+
+        m_driverController.triangle()
+            .onTrue(); //elevator level 4
+
+        //Grabber Controls
+        m_driverController.L1()
+            .onTrue(); // grabber outtake left 
+
+        m_driverController.L2()
+            .onTrue(); // grabber intake left 
+
+        m_driverController.R1()
+            .onTrue(); //grabber outtake right 
+
+        m_driverController.R2()
+            .onTrue(); //grabber intake right
+        
+        
 
         // Reset the heading of the gyro
         m_driverController.create()

@@ -119,38 +119,38 @@ public class RobotContainer {
 
         // Pickeball Controls
             m_driverController.povUp()
-            .onTrue() //pickeball shooter on
-            .onFalse(); //pickeball shooter off
+            .onTrue(Commands.none()) //pickeball shooter on
+            .onFalse(Commands.none()); //pickeball shooter off
             
         m_driverController.povDown()
-            .onTrue() //pickleball intake on
-            .onFalse(); //pickeball intake off
+            .onTrue(Commands.none()) //pickleball intake on
+            .onFalse(Commands.none()); //pickeball intake off
 
         // Elevator Controls
-            m_driverController.cross()
-            .onTrue(); //elevator level 1
+        m_driverController.cross()
+            .onTrue(Commands.none()); //elevator level 1
         
         m_driverController.circle()
-            .onTrue(); //elevator level 2 
+            .onTrue(Commands.none()); //elevator level 2 
 
         m_driverController.square()
-            .onTrue(); //elevator level 3
+            .onTrue(Commands.none()); //elevator level 3
 
         m_driverController.triangle()
-            .onTrue(); //elevator level 4
+            .onTrue(Commands.none()); //elevator level 4
 
         //Grabber Controls
         m_driverController.L1()
-            .onTrue(); // grabber outtake left 
+            .onTrue(Commands.none()); // grabber outtake left 
 
         m_driverController.L2()
-            .onTrue(); // grabber intake left 
+            .onTrue(Commands.none()); // grabber intake left 
 
         m_driverController.R1()
-            .onTrue(); //grabber outtake right 
+            .onTrue(Commands.none()); //grabber outtake right 
 
         m_driverController.R2()
-            .onTrue(); //grabber intake right
+            .onTrue(Commands.none()); //grabber intake right
         
         
 

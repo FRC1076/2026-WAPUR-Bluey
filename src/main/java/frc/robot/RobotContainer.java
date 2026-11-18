@@ -15,6 +15,15 @@ import frc.robot.subsystems.drive.DriveIOHardware;
 import frc.robot.subsystems.drive.DriveIOSim;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.drive.TunerConstants;
+import frc.robot.subsystems.elevator.ElevatorIODisabled;
+import frc.robot.subsystems.elevator.ElevatorIOKraken;
+import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.subsystems.grabber.left.LeftGrabberIODisabled;
+import frc.robot.subsystems.grabber.left.LeftGrabberIOKraken;
+import frc.robot.subsystems.grabber.left.LeftGrabberSubsystem;
+import frc.robot.subsystems.grabber.right.RightGrabberIODisabled;
+import frc.robot.subsystems.grabber.right.RightGrabberIOKraken;
+import frc.robot.subsystems.grabber.right.RightGrabberSubsystem;
 import lib.hardware.hid.SamuraiPS5Controller;
 import lib.hardware.hid.SamuraiXboxController;
 import lib.vision.VisionLocalizationSystem;
@@ -39,6 +48,9 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
     // The robot's subsystems and commands are defined here...
     private final DriveSubsystem m_drive;
+    private final LeftGrabberSubsystem m_leftGrabber;
+    private final RightGrabberSubsystem m_rightGrabber;
+    private final ElevatorSubsystem m_elevator;
 
     private final VisionLocalizationSystem m_vision;
 
@@ -65,6 +77,9 @@ public class RobotContainer {
                 m_vision,
                 m_elastic
             );
+            m_leftGrabber = new LeftGrabberSubsystem(new LeftGrabberIOKraken());
+            m_rightGrabber = new RightGrabberSubsystem(new RightGrabberIOKraken());
+            m_elevator = new ElevatorSubsystem(new ElevatorIOKraken());
         } else {
             // The robot is not real. Use the disabled or simulation IO layers
             m_drive = new DriveSubsystem(
@@ -72,6 +87,9 @@ public class RobotContainer {
                 m_vision,
                 m_elastic
             );
+            m_leftGrabber = new LeftGrabberSubsystem(new LeftGrabberIODisabled());
+            m_rightGrabber = new RightGrabberSubsystem(new RightGrabberIODisabled());
+            m_elevator = new ElevatorSubsystem(new ElevatorIODisabled());
         }
 
         teleopDriveCommand = new TeleopDriveCommand(
@@ -113,16 +131,46 @@ public class RobotContainer {
     private void configureDriverBindings() {
         m_drive.setDefaultCommand(teleopDriveCommand);
 
-        // Single clutch
-        m_driverController.R1().and(m_driverController.R2().negate())
-            .whileTrue(teleopDriveCommand.applySingleClutch());
-
-        m_driverController.R2()
-            .whileTrue(teleopDriveCommand.applyDoubleClutch());
-
         // Brake
         m_driverController.L3().or(m_driverController.R3())
             .whileTrue(teleopDriveCommand.applySwerveBrake());
+
+        // Pickeball Controls
+            m_driverController.povUp()
+            .onTrue(Commands.none()) //pickeball shooter on
+            .onFalse(Commands.none()); //pickeball shooter off
+            
+        m_driverController.povDown()
+            .onTrue(Commands.none()) //pickleball intake on
+            .onFalse(Commands.none()); //pickeball intake off
+
+        // Elevator Controls
+        m_driverController.cross()
+            .onTrue(Commands.none()); //elevator level 1
+        
+        m_driverController.circle()
+            .onTrue(Commands.none()); //elevator level 2 
+
+        m_driverController.square()
+            .onTrue(Commands.none()); //elevator level 3
+
+        m_driverController.triangle()
+            .onTrue(Commands.none()); //elevator level 4
+
+        //Grabber Controls
+        m_driverController.L1()
+            .onTrue(Commands.none()); // grabber outtake left 
+
+        m_driverController.L2()
+            .onTrue(Commands.none()); // grabber intake left 
+
+        m_driverController.R1()
+            .onTrue(Commands.none()); //grabber outtake right 
+
+        m_driverController.R2()
+            .onTrue(Commands.none()); //grabber intake right
+        
+        
 
         // Reset the heading of the gyro
         m_driverController.create()

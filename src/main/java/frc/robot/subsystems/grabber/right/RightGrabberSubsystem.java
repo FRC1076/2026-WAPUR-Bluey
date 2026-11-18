@@ -1,0 +1,60 @@
+package frc.robot.subsystems.grabber.right;
+
+import org.littletonrobotics.junction.Logger;
+
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.grabber.GrabberConstants;
+
+public class RightGrabberSubsystem extends SubsystemBase {
+    private final RightGrabberIO io;
+    private final RightGrabberIOInputsAutoLogged inputs = new RightGrabberIOInputsAutoLogged();
+
+    public final Trigger voltageApplied =
+        new Trigger(() -> Math.abs(inputs.appliedVolts) > GrabberConstants.kVoltageAppliedThreshold);
+
+    public RightGrabberSubsystem(RightGrabberIO io) {
+        this.io = io;
+    }
+
+    @Override
+    public void periodic() {
+        io.updateInputs(inputs);
+        Logger.processInputs("RightGrabber", inputs);
+    }
+
+    /** Runs the grabber at the given voltage, and stops it when the command ends */
+    public Command setVoltage(double volts) {
+        return startEnd(
+            () -> io.runVolts(volts),
+            () -> io.runVolts(0.0)
+        );
+    }
+
+    /** Runs the grabber at the given velocity, and stops it when the command ends */
+    public Command setVelocity(double radPerSec) {
+        return startEnd(
+            () -> io.setVelocity(radPerSec),
+            () -> io.runVolts(0.0)
+        );
+    }
+
+    /** Tells the grabber to go to (and hold) the given position */
+    public Command setPosition(double radians) {
+        return runOnce(() -> io.setPosition(radians));
+    }
+
+    /** Stops the grabber's motor */
+    public Command stop() {
+        return runOnce(() -> io.runVolts(0.0));
+    }
+
+    public double getPositionRadians() {
+        return inputs.positionRadians;
+    }
+
+    public double getVelocityRadPerSec() {
+        return inputs.velocityRadPerSec;
+    }
+}

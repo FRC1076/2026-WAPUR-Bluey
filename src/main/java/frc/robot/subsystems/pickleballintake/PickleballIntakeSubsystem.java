@@ -23,11 +23,28 @@ public class PickleballIntakeSubsystem extends SubsystemBase {
         Logger.processInputs("PickleballIntake", inputs);
     }
 
+    /** Runs the intake at the given voltage, and stops it when the command ends */
     public Command setVoltage(double volts) {
         return startEnd(() -> io.runVolts(volts), () -> io.runVolts(0.0));
     }
 
+    /** Runs the intake at the given velocity, and stops it when the command ends */
     public Command setVelocity(double radiansPerSecond) {
         return startEnd(() -> io.setVelocity(radiansPerSecond), () -> io.runVolts(0.0));
+    }
+
+    /** Runs the intake inward while held, and stops it when released */
+    public Command intake() {
+        return setVoltage(PickleballIntakeConstants.kIntakeVolts);
+    }
+
+    /** Runs the intake backwards while held, and stops it when released */
+    public Command reverse() {
+        return setVoltage(PickleballIntakeConstants.kReverseVolts);
+    }
+
+    /** Stops the intake */
+    public Command stop() {
+        return runOnce(() -> io.runVolts(0.0));
     }
 }

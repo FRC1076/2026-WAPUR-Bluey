@@ -45,6 +45,16 @@ public class LeftGrabberSubsystem extends SubsystemBase {
         return runOnce(() -> io.setPosition(radians));
     }
 
+    /** Runs the grabber inward while held, and stops it when released */
+    public Command intake() {
+        return setVoltage(GrabberConstants.kIntakeVolts);
+    }
+
+    /** Runs the grabber outward while held, and stops it when released */
+    public Command outtake() {
+        return setVoltage(GrabberConstants.kOuttakeVolts);
+    }
+
     /** Stops the grabber's motor */
     public Command stop() {
         return runOnce(() -> io.runVolts(0.0));

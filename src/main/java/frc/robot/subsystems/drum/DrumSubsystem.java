@@ -66,7 +66,7 @@ public class DrumSubsystem extends SubsystemBase {
         return new Trigger(this::atSetpoint);
     }
 
-    /** Set the voltage of the motor */
+    /** Set the voltage of the motor. Keeps running after the command ends! */
     public Command applyVoltage(double volts) {
         return Commands.runOnce(
             () -> io.setVoltage(volts),
@@ -82,7 +82,7 @@ public class DrumSubsystem extends SubsystemBase {
         );
     }
 
-    /** Tell the drum to run at the specified velocity */
+    /** Tell the drum to run at the specified velocity. Keeps running after the command ends! */
     public Command applyVelocity(double radPerSec) {
         return Commands.runOnce(
             () -> io.setVelocity(radPerSec),
@@ -98,14 +98,14 @@ public class DrumSubsystem extends SubsystemBase {
         );
     }
 
-    /** Spin the drum up to the default shooting velocity */
+    /** Spin the drum at the default shooting velocity while held, and stop when released */
     public Command spinUp() {
-        return applyVelocity(DrumConstants.kShootVelocityRadPerSec);
+        return startEnd(() -> io.setVelocity(DrumConstants.kShootVelocityRadPerSec), () -> io.setVoltage(0));
     }
 
-    /** Spin the drum up and wait until it reaches the default shooting velocity */
+    /** Spin the drum up and finish once it reaches the default shooting velocity. Keeps spinning after! */
     public Command spinUpAndWait() {
-        return spinUp().andThen(Commands.waitUntil(this::atSetpoint));
+        return applyVelocity(DrumConstants.kShootVelocityRadPerSec).andThen(Commands.waitUntil(this::atSetpoint));
     }
 
     /** Increase the drum's target velocity by one increment */
@@ -128,9 +128,9 @@ public class DrumSubsystem extends SubsystemBase {
         );
     }
 
-    /** Run the drum backwards to clear jams */
+    /** Run the drum backwards while held (to clear jams), and stop when released */
     public Command reverse() {
-        return applyVoltage(DrumConstants.kReverseVolts);
+        return startEnd(() -> io.setVoltage(DrumConstants.kReverseVolts), () -> io.setVoltage(0));
     }
 
     /** Stop the drum */

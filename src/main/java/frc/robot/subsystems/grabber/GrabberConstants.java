@@ -30,4 +30,8 @@ public class GrabberConstants {
 
     // Applied voltage above this counts as "the motor is running" for the voltageApplied triggers
     public static final double kVoltageAppliedThreshold = 0.1;
+
+    // Preset voltages
+    public static final double kIntakeVolts = 6; // TODO: tune this value
+    public static final double kOuttakeVolts = -6; // TODO: tune this value
 }

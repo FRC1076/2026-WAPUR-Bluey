@@ -1,3 +1,7 @@
+// Copyright (c) FRC 1076 PiHi Samurai
+// You may use, distribute, and modify this software under the terms of
+// the license found in the root directory of this project
+
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
@@ -8,7 +12,7 @@ import frc.robot.Constants.CANConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.SystemConstants;
 import frc.robot.Constants.SystemConstants.RobotMode;
-import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.PickleballCommands;
 import frc.robot.commands.drive.TeleopDriveCommand;
 import frc.robot.subsystems.Elastic;
 import frc.robot.subsystems.drive.DriveIOHardware;
@@ -21,15 +25,15 @@ import frc.robot.subsystems.drum.DrumSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIODisabled;
 import frc.robot.subsystems.elevator.ElevatorIOKraken;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
-import frc.robot.subsystems.indexer.IndexerIODisabled;
-import frc.robot.subsystems.indexer.IndexerIOKraken;
-import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.grabber.left.LeftGrabberIODisabled;
 import frc.robot.subsystems.grabber.left.LeftGrabberIOKraken;
 import frc.robot.subsystems.grabber.left.LeftGrabberSubsystem;
 import frc.robot.subsystems.grabber.right.RightGrabberIODisabled;
 import frc.robot.subsystems.grabber.right.RightGrabberIOKraken;
 import frc.robot.subsystems.grabber.right.RightGrabberSubsystem;
+import frc.robot.subsystems.indexer.IndexerIODisabled;
+import frc.robot.subsystems.indexer.IndexerIOKraken;
+import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.pickleballintake.PickleballIntakeIODisabled;
 import frc.robot.subsystems.pickleballintake.PickleballIntakeIOKraken;
 import frc.robot.subsystems.pickleballintake.PickleballIntakeSubsystem;
@@ -45,7 +49,6 @@ import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -69,12 +72,12 @@ public class RobotContainer {
     private final Elastic m_elastic;
 
     // Command for the driver
-    TeleopDriveCommand teleopDriveCommand;
+    private final TeleopDriveCommand teleopDriveCommand;
 
     // Controllers
     private final SamuraiPS5Controller m_driverController =
         new SamuraiPS5Controller(OIConstants.kDriverControllerPort);
-    private final SamuraiXboxController m_operatorController = 
+    private final SamuraiXboxController m_operatorController =
         new SamuraiXboxController(OIConstants.kOperatorControllerPort);
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -82,7 +85,7 @@ public class RobotContainer {
         m_vision = new VisionLocalizationSystem();
         m_elastic = new Elastic();
 
-        if (SystemConstants.kMode == RobotMode.REAL || RobotBase.isReal()) {
+        if (SystemConstants.kMode == RobotMode.REAL && RobotBase.isReal()) {
             // The robot is real! Use the real IO layers
             m_drive = new DriveSubsystem(
                 new DriveIOHardware(TunerConstants.createDrivetrain()),
@@ -128,15 +131,7 @@ public class RobotContainer {
         configureOperatorBindings();
     }
 
-    /**
-     * Use this method to define your trigger->command mappings. Triggers can be created via the
-     * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
-     * predicate, or via the named factories in {@link
-     * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-     * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-     * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-     * joysticks}.
-     */
+    /** Use this method to define bindings that are not tied to a specific controller */
     private void configureBindings() {
         // Update alliance from Elastic
         new Trigger(() -> m_elastic.getSelectedTeamColor() == Alliance.Blue)
@@ -149,57 +144,26 @@ public class RobotContainer {
     private void configureDriverBindings() {
         m_drive.setDefaultCommand(teleopDriveCommand);
 
-        // Brake
-        m_driverController.L3().or(m_driverController.R3())
-            .whileTrue(teleopDriveCommand.applySwerveBrake());
+        // How to pick the binding type:
+        //   whileTrue -> runs while the button is held, stops when released (grabbers, pickleball, brake)
+        //   onTrue    -> runs once when the button is pressed (elevator levels, reset gyro)
 
-        // Pickeball Controls
-            m_driverController.povUp()
-            .onTrue(Commands.none()) //pickeball shooter on
-            .onFalse(Commands.none()); //pickeball shooter off
-            
-        m_driverController.povDown()
-            .onTrue(Commands.none()) //pickleball intake on
-            .onFalse(Commands.none()); //pickeball intake off
-
-        // Elevator Controls
-        m_driverController.cross()
-            .onTrue(Commands.none()); //elevator level 1
-        
-        m_driverController.circle()
-            .onTrue(Commands.none()); //elevator level 2 
-
-        m_driverController.square()
-            .onTrue(Commands.none()); //elevator level 3
-
-        m_driverController.triangle()
-            .onTrue(Commands.none()); //elevator level 4
-
-        //Grabber Controls
-        m_driverController.L1()
-            .onTrue(Commands.none()); // grabber outtake left 
-
-        m_driverController.L2()
-            .onTrue(Commands.none()); // grabber intake left 
-
-        m_driverController.R1()
-            .onTrue(Commands.none()); //grabber outtake right 
-
-        m_driverController.R2()
-            .onTrue(Commands.none()); //grabber intake right
-        
-        
-
-        // Reset the heading of the gyro
-        m_driverController.create()
-            .onTrue(Commands.runOnce(() ->
-                m_drive.resetHeading()
-            ));
+        // Brake: L3 or R3                       -> teleopDriveCommand.applySwerveBrake()   (whileTrue)
+        // Reset gyro: Options                    -> Commands.runOnce(() -> m_drive.resetHeading())   (onTrue)
+        // Grabber intake/outtake left: L2 / L1   -> m_leftGrabber.intake() / m_leftGrabber.outtake()   (whileTrue)
+        // Grabber intake/outtake right: R2 / R1  -> m_rightGrabber.intake() / m_rightGrabber.outtake()   (whileTrue)
+        // Pickleball shooter: D-pad up           -> PickleballCommands.shoot(m_drum, m_indexer)   (whileTrue)
+        // Pickleball intake: D-pad down          -> m_pickleballIntake.intake()   (whileTrue)
+        // Elevator levels 1-4: Cross / Circle / Square / Triangle -> m_elevator.goToLevel(1) ... goToLevel(4)   (onTrue)
     }
 
     /** Bind triggers on operator controller to commands */
     private void configureOperatorBindings() {
-
+        // Pickleball shooter backwards: D-pad up  -> PickleballCommands.shootBackwards(m_drum, m_indexer)   (whileTrue)
+        // Pickleball intake backwards: D-pad down -> m_pickleballIntake.reverse()   (whileTrue)
+        // Elevator increment up: right stick up   -> m_elevator.incrementUp()   (onTrue)
+        //     Stick up is negative Y, so the trigger is: new Trigger(() -> m_operatorController.getRightY() < -0.5)
+        // Elevator increment down: right stick click -> m_elevator.incrementDown()   (onTrue)
     }
 
     /**
@@ -208,7 +172,6 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        // An example command will be run in autonomous
         return m_elastic.getSelectedAutonomousCommand();
     }
 

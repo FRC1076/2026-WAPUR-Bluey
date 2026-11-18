@@ -44,6 +44,7 @@ public class DrumConstants {
 
     public static final double kManualShootVolts = 10; // TODO: tune this value
     public static final double kReverseVolts = -3; // TODO: tune this value
+    public static final double kMaxSpinUpSeconds = 1.0; // shooter feeds after this long even if the drum isn't up to speed yet
 
     // FOC
     public static final boolean kUseFOC = true;

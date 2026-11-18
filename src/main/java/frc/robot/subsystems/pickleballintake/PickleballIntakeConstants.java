@@ -32,4 +32,8 @@ public class PickleballIntakeConstants {
 
     // Applied voltage above this counts as "the intake is running"
     public static final double kVoltageAppliedThreshold = 0.1;
+
+    // Preset voltages
+    public static final double kIntakeVolts = 6; // TODO: tune this value
+    public static final double kReverseVolts = -4; // TODO: tune this value
 }

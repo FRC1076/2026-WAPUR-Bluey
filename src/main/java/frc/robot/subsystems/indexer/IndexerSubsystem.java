@@ -26,7 +26,7 @@ public class IndexerSubsystem extends SubsystemBase {
         Logger.processInputs("Indexer", inputs);
     }
 
-    /** Set the motor to the specified voltage */
+    /** Set the motor to the specified voltage. Keeps running after the command ends! */
     public Command applyVoltage(double volts) {
         return Commands.runOnce(
             () -> io.setVoltage(volts),
@@ -42,7 +42,7 @@ public class IndexerSubsystem extends SubsystemBase {
         );
     }
 
-    /** Set the motor to the specified velocity */
+    /** Set the motor to the specified velocity. Keeps running after the command ends! */
     public Command applyVelocity(double radPerSec) {
         return Commands.runOnce(
             () -> io.setVelocity(radPerSec),
@@ -58,14 +58,14 @@ public class IndexerSubsystem extends SubsystemBase {
         );
     }
 
-    /** Run the indexer to feed pickleballs towards the drum */
+    /** Feed pickleballs towards the drum while held, and stop when released */
     public Command index() {
-        return applyVoltage(IndexerConstants.kIndexVolts);
+        return startEnd(() -> io.setVoltage(IndexerConstants.kIndexVolts), () -> io.setVoltage(0));
     }
 
-    /** Run the motor in reverse to clear jams */
+    /** Run the indexer in reverse while held (to clear jams), and stop when released */
     public Command reverse() {
-        return applyVoltage(IndexerConstants.kReverseVolts);
+        return startEnd(() -> io.setVoltage(IndexerConstants.kReverseVolts), () -> io.setVoltage(0));
     }
 
     /** Stop the motor */

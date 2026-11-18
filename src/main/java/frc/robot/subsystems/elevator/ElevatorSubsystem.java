@@ -6,6 +6,8 @@ import static edu.wpi.first.units.Units.Volts;
 
 import org.littletonrobotics.junction.Logger;
 
+import java.util.Set;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -17,6 +19,9 @@ public class ElevatorSubsystem extends SubsystemBase{
     private final ElevatorIO io;
     private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
     private final SysIdRoutine sysId;
+
+    // The height the elevator was last told to go to
+    private double m_targetMeters = ElevatorConstants.kBackwardPositionLimit;
 
     public ElevatorSubsystem(ElevatorIO io) {
         this.io = io;
@@ -41,8 +46,9 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     @Override
     public void periodic() {
-    io.updateInputs(inputs);
-    Logger.processInputs("Elevator", inputs);
+        io.updateInputs(inputs);
+        Logger.processInputs("Elevator", inputs);
+        Logger.recordOutput("Elevator/TargetMeters", m_targetMeters);
     }
 
     public double getPosition() {
@@ -64,11 +70,42 @@ public class ElevatorSubsystem extends SubsystemBase{
         );
     }
 
+    /** Tells the elevator to go to (and hold) the given height */
     public Command setPosition(double meters) {
         return Commands.runOnce(
-            () -> io.setPosition(MathUtil.clamp(meters, ElevatorConstants.kBackwardPositionLimit, ElevatorConstants.kForwardPositionLimit)),
+            () -> {
+                m_targetMeters = MathUtil.clamp(meters, ElevatorConstants.kBackwardPositionLimit, ElevatorConstants.kForwardPositionLimit);
+                io.setPosition(m_targetMeters);
+            },
             this
         );
+    }
+
+    /** Sends the elevator to a scoring level (1-4) */
+    public Command goToLevel(int level) {
+        double height = switch (level) {
+            case 1 -> ElevatorConstants.kLevel1HeightMeters;
+            case 2 -> ElevatorConstants.kLevel2HeightMeters;
+            case 3 -> ElevatorConstants.kLevel3HeightMeters;
+            case 4 -> ElevatorConstants.kLevel4HeightMeters;
+            default -> throw new IllegalArgumentException("Elevator level must be 1-4, got " + level);
+        };
+        return setPosition(height);
+    }
+
+    /** Moves the elevator target up by one increment */
+    public Command incrementUp() {
+        return Commands.defer(() -> setPosition(m_targetMeters + ElevatorConstants.kIncrementMeters), Set.of(this));
+    }
+
+    /** Moves the elevator target down by one increment */
+    public Command incrementDown() {
+        return Commands.defer(() -> setPosition(m_targetMeters - ElevatorConstants.kIncrementMeters), Set.of(this));
+    }
+
+    /** The height the elevator was last told to go to */
+    public double getTargetMeters() {
+        return m_targetMeters;
     }
 
     public Command stop() {

@@ -23,8 +23,8 @@ public class ElevatorConstants {
     public static final double kStatorCurrentLimit = 80;
 
     // magic motion, in meters of carriage travel
-    public static final double kCruiseVelocityMetersPerSec = 0; // TODO: target cruise velocity (elevator won't move under motion magic while this is 0)
-    public static final double kAccelerationMetersPerSec2 = 0; // TODO: target acceleration
+    public static final double kCruiseVelocityMetersPerSec = 1.0; // TODO: tune (slow placeholder so motion magic can move)
+    public static final double kAccelerationMetersPerSec2 = 2.0; // TODO: tune
     public static final double kJerkMetersPerSec3 = 0; // target jerk (0 = no jerk limit)
 
     // gains in SI units (volts per meter), to be tuned
@@ -46,4 +46,13 @@ public class ElevatorConstants {
     public static final double slackMargin = 0.1; // leeway in position limits for safety
     public static final double kForwardPositionLimit = 4.5 - slackMargin; // TODO: check max height
     public static final double kBackwardPositionLimit = slackMargin;
+
+    // level heights, in meters
+    public static final double kLevel1HeightMeters = 0.2; // TODO: measure real level 1 height
+    public static final double kLevel2HeightMeters = 1.0; // TODO: measure real level 2 height
+    public static final double kLevel3HeightMeters = 2.0; // TODO: measure real level 3 height
+    public static final double kLevel4HeightMeters = 3.0; // TODO: measure real level 4 height
+
+    // how far one increment up/down moves the elevator, in meters
+    public static final double kIncrementMeters = 0.05; // TODO: tune
 }

@@ -4,11 +4,35 @@
 
 package frc.robot;
 
-import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.Autos;
+import frc.robot.Constants.CANConstants;
+import frc.robot.Constants.OIConstants;
+import frc.robot.Constants.SystemConstants;
+import frc.robot.Constants.SystemConstants.RobotMode;
 import frc.robot.commands.ExampleCommand;
-import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.commands.drive.TeleopDriveCommand;
+import frc.robot.subsystems.Elastic;
+import frc.robot.subsystems.drive.DriveIOHardware;
+import frc.robot.subsystems.drive.DriveIOSim;
+import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.drive.TunerConstants;
+import frc.robot.subsystems.grabber.left.LeftGrabberIODisabled;
+import frc.robot.subsystems.grabber.left.LeftGrabberIOKraken;
+import frc.robot.subsystems.grabber.left.LeftGrabberSubsystem;
+import frc.robot.subsystems.grabber.right.RightGrabberIODisabled;
+import frc.robot.subsystems.grabber.right.RightGrabberIOKraken;
+import frc.robot.subsystems.grabber.right.RightGrabberSubsystem;
+import lib.hardware.hid.SamuraiPS5Controller;
+import lib.hardware.hid.SamuraiXboxController;
+import lib.vision.VisionLocalizationSystem;
+
+import com.ctre.phoenix6.CANBus.CANBusStatus;
+
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -20,16 +44,64 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
     // The robot's subsystems and commands are defined here...
-    private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+    private final DriveSubsystem m_drive;
+    private final LeftGrabberSubsystem m_leftGrabber;
+    private final RightGrabberSubsystem m_rightGrabber;
 
-    // Replace with CommandPS4Controller or CommandJoystick if needed
-    private final CommandXboxController m_driverController =
-        new CommandXboxController(OperatorConstants.kDriverControllerPort);
+    private final VisionLocalizationSystem m_vision;
+
+    private final Elastic m_elastic;
+
+    // Command for the driver
+    TeleopDriveCommand teleopDriveCommand;
+
+    // Controllers
+    private final SamuraiPS5Controller m_driverController =
+        new SamuraiPS5Controller(OIConstants.kDriverControllerPort);
+    private final SamuraiXboxController m_operatorController = 
+        new SamuraiXboxController(OIConstants.kOperatorControllerPort);
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
+        m_vision = new VisionLocalizationSystem();
+        m_elastic = new Elastic();
+
+        if (SystemConstants.kMode == RobotMode.REAL || RobotBase.isReal()) {
+            // The robot is real! Use the real IO layers
+            m_drive = new DriveSubsystem(
+                new DriveIOHardware(TunerConstants.createDrivetrain()),
+                m_vision,
+                m_elastic
+            );
+            m_leftGrabber = new LeftGrabberSubsystem(new LeftGrabberIOKraken());
+            m_rightGrabber = new RightGrabberSubsystem(new RightGrabberIOKraken());
+        } else {
+            // The robot is not real. Use the disabled or simulation IO layers
+            m_drive = new DriveSubsystem(
+                new DriveIOSim(TunerConstants.createDrivetrain()),
+                m_vision,
+                m_elastic
+            );
+            m_leftGrabber = new LeftGrabberSubsystem(new LeftGrabberIODisabled());
+            m_rightGrabber = new RightGrabberSubsystem(new RightGrabberIODisabled());
+        }
+
+        teleopDriveCommand = new TeleopDriveCommand(
+            m_drive,
+            () -> -m_driverController.getLeftY(),
+            () -> -m_driverController.getLeftX(),
+            () -> -m_driverController.getRightX()
+        );
+
+        // Set the alliance color
+        setAlliance(m_elastic.getSelectedTeamColor());
+
         // Configure the trigger bindings
         configureBindings();
+
+        configureDriverBindings();
+
+        configureOperatorBindings();
     }
 
     /**
@@ -42,13 +114,68 @@ public class RobotContainer {
      * joysticks}.
      */
     private void configureBindings() {
-        // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-        new Trigger(m_exampleSubsystem::exampleCondition)
-            .onTrue(new ExampleCommand(m_exampleSubsystem));
+        // Update alliance from Elastic
+        new Trigger(() -> m_elastic.getSelectedTeamColor() == Alliance.Blue)
+            .onTrue(Commands.runOnce(() -> setAlliance(Alliance.Blue)).ignoringDisable(true));
+        new Trigger(() -> m_elastic.getSelectedTeamColor() == Alliance.Red)
+            .onTrue(Commands.runOnce(() -> setAlliance(Alliance.Red)).ignoringDisable(true));
+    }
 
-        // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-        // cancelling on release.
-        m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+    /** Bind triggers on driver controller to commands */
+    private void configureDriverBindings() {
+        m_drive.setDefaultCommand(teleopDriveCommand);
+
+        // Brake
+        m_driverController.L3().or(m_driverController.R3())
+            .whileTrue(teleopDriveCommand.applySwerveBrake());
+
+        // Pickeball Controls
+            m_driverController.povUp()
+            .onTrue(Commands.none()) //pickeball shooter on
+            .onFalse(Commands.none()); //pickeball shooter off
+            
+        m_driverController.povDown()
+            .onTrue(Commands.none()) //pickleball intake on
+            .onFalse(Commands.none()); //pickeball intake off
+
+        // Elevator Controls
+        m_driverController.cross()
+            .onTrue(Commands.none()); //elevator level 1
+        
+        m_driverController.circle()
+            .onTrue(Commands.none()); //elevator level 2 
+
+        m_driverController.square()
+            .onTrue(Commands.none()); //elevator level 3
+
+        m_driverController.triangle()
+            .onTrue(Commands.none()); //elevator level 4
+
+        //Grabber Controls
+        m_driverController.L1()
+            .onTrue(Commands.none()); // grabber outtake left 
+
+        m_driverController.L2()
+            .onTrue(Commands.none()); // grabber intake left 
+
+        m_driverController.R1()
+            .onTrue(Commands.none()); //grabber outtake right 
+
+        m_driverController.R2()
+            .onTrue(Commands.none()); //grabber intake right
+        
+        
+
+        // Reset the heading of the gyro
+        m_driverController.create()
+            .onTrue(Commands.runOnce(() ->
+                m_drive.resetHeading()
+            ));
+    }
+
+    /** Bind triggers on operator controller to commands */
+    private void configureOperatorBindings() {
+
     }
 
     /**
@@ -58,6 +185,31 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         // An example command will be run in autonomous
-        return Autos.exampleAuto(m_exampleSubsystem);
+        return m_elastic.getSelectedAutonomousCommand();
+    }
+
+    public void registerNamedCommands() {
+
+    }
+
+    public CANBusStatus getCANivoreBusStatus() {
+        return CANConstants.kCANivoreBus.getStatus();
+    }
+
+    /** Command to raise thread priority */
+    public static Command threadCommand() {
+        return Commands.sequence(
+            Commands.waitSeconds(25),
+            Commands.runOnce(() -> Threads.setCurrentThreadPriority(true, 1)),
+            Commands.print("Main Thread Priority raised to RT1 at " + Timer.getFPGATimestamp())
+        ).ignoringDisable(true);
+    }
+
+    /** Command to change which alliance we are on */
+    public void setAlliance(Alliance newAlliance) {
+        // m_drive.setAllianceRotation(newAlliance);
+        // m_superstructure.setTeamColor(newAlliance);
+
+        // TODO: uncomment when these exist
     }
 }

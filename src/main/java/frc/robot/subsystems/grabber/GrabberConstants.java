@@ -15,11 +15,11 @@ public class GrabberConstants {
     // all constants are etheir made up or taken form refrence and are subject to change
 
     // CAN bus both grabber motors are on
-    public static final CANBus kCANBus = CANConstants.kCANivoreBus; // TODO: check if these are on the CANivore or the rio bus
+    public static final CANBus kCANBus = CANConstants.kRioBus; // TODO: check if these are on the CANivore or the rio bus
 
     // current limits
     public static final double kSupplyCurrentLimit = 40;
-    public static final double kStatorCurrentLimit = 70;
+    public static final double kStatorCurrentLimit = 80;
 
     public static final double kPeakForwardVoltage = 12; //TODO check this.
     public static final double kPeakReverseVoltage = -12;

@@ -21,7 +21,7 @@ public class DrumConstants {
     public static final double kStatorCurrentLimit = 80;
 
     public static final InvertedValue kInverted = InvertedValue.Clockwise_Positive; // TODO: confirm direction
-    public static final NeutralModeValue kNeutralMode = NeutralModeValue.Coast; // Let the drum spin down freely
+    public static final NeutralModeValue kNeutralMode = NeutralModeValue.Coast; // Let the drum spin down freely, TODO: confirm that we want this
 
     // Gear ratio
     public static final double kGearRatio = 1; // TODO: confirm gear ratio
@@ -29,7 +29,7 @@ public class DrumConstants {
     // Closed-loop (VelocityTorqueCurrentFOC, so output units are amps)
     public static final double kP = 0; // TODO: tune this value
     public static final double kI = 0;
-    public static final double kD = 0;
+    public static final double kD = 0; // TODO: tune this value
     public static final double kS = 0; // TODO: tune this value
     public static final double kV = 0; // TODO: tune this value
     public static final double kA = 0;
@@ -39,12 +39,12 @@ public class DrumConstants {
     // Setpoints
     public static final double kShootVelocityRadPerSec = 300; // TODO: tune this value
     public static final double kSetpointToleranceRadPerSec = 30; // TODO: tune this value
-    public static final double kVelocityIncrementRadPerSec = 25;
+    public static final double kVelocityIncrementRadPerSec = 25; // TODO: tune this value
     public static final double kMaxVelocityRadPerSec = 600; // Kraken X60 free speed is ~628 rad/s at 1:1
 
     public static final double kManualShootVolts = 10; // TODO: tune this value
     public static final double kReverseVolts = -3; // TODO: tune this value
-    public static final double kMaxSpinUpSeconds = 1.0; // shooter feeds after this long even if the drum isn't up to speed yet
+    public static final double kMaxSpinUpSeconds = 1.0; // shooter feeds after this long even if the drum isn't up to speed yet, TODO: tune this value
 
     // FOC
     public static final boolean kUseFOC = true;

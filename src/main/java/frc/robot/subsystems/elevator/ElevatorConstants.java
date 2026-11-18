@@ -4,6 +4,7 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.util.Units;
 import frc.robot.Constants.CANConstants;
 
 public class ElevatorConstants {
@@ -16,36 +17,36 @@ public class ElevatorConstants {
 
     // values
     public static final InvertedValue kInverted = InvertedValue.Clockwise_Positive; // depends on orientation
-    public static final NeutralModeValue kNeutralMode = NeutralModeValue.Brake;
+    public static final NeutralModeValue kNeutralMode = NeutralModeValue.Brake; // Stop the elevator from falling upon disable
 
     // current limits
     public static final double kSupplyCurrentLimit = 40; // TODO: check these
     public static final double kStatorCurrentLimit = 80;
 
     // magic motion, in meters of carriage travel
-    public static final double kCruiseVelocityMetersPerSec = 1.0; // TODO: tune (slow placeholder so motion magic can move)
-    public static final double kAccelerationMetersPerSec2 = 2.0; // TODO: tune
+    public static final double kCruiseVelocityMetersPerSec = 1000.0; // TODO: tune (fast placeholder so motion magic can move freely)
+    public static final double kAccelerationMetersPerSec2 = 1000.0; // TODO: tune (high placeholder so motion magic can move freely)
     public static final double kJerkMetersPerSec3 = 0; // target jerk (0 = no jerk limit)
 
-    // gains in SI units (volts per meter), to be tuned
-    public static final double kS = 0; // volts
-    public static final double kV = 0;
-    public static final double kG = 0; // gravity, volts
-    public static final double kA = 0;
-    public static final double kP = 0; // pids
+    // gains in SI units (volts per meter), TODO: tune these values
+    public static final double kP = 0;
     public static final double kI = 0;
     public static final double kD = 0;
+    public static final double kS = 0;
+    public static final double kG = 0;
+    public static final double kV = 0;
+    public static final double kA = 0;
 
     // cascade elevator calculations
-    public static final double kSensorToMechanismRatio = 1; // TODO: motor rotations per drum rotation (gear ratio). Can't be 0.
-    public static final double kDrumPitchDiameter = 0.0381; // TODO: real drum pitch diameter in meters. Can't be 0.
-    public static final double kStages = 3; // three stage elevator
+    public static final double kSensorToMechanismRatio = 5; // TODO: check this value
+    public static final double kDrumPitchDiameter = Units.inchesToMeters(1.757); // TODO: check this value
+    public static final double kStages = 1; // one stage elevator
     public static final double kMetersPerDrumRotation = kDrumPitchDiameter * Math.PI * kStages;
 
     // soft limits, in meters
-    public static final double slackMargin = 0.1; // leeway in position limits for safety
-    public static final double kForwardPositionLimit = 4.5 - slackMargin; // TODO: check max height
-    public static final double kBackwardPositionLimit = slackMargin;
+    public static final double kSlackMargin  = 0.1; // leeway in position limits for safety
+    public static final double kForwardPositionLimit = 4.5 - kSlackMargin; // TODO: check max height
+    public static final double kBackwardPositionLimit = kSlackMargin;
 
     // level heights, in meters
     public static final double kLevel1HeightMeters = 0.2; // TODO: measure real level 1 height

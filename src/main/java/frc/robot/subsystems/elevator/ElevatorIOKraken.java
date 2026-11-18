@@ -15,7 +15,7 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import lib.units.TalonFXUnitConverter;
 
-public class ElevatorIOKraken implements ElevatorIO{
+public class ElevatorIOKraken implements ElevatorIO {
 
     // creation
     private final TalonFX m_motor = new TalonFX(ElevatorConstants.kLeaderID, ElevatorConstants.kCANBus);

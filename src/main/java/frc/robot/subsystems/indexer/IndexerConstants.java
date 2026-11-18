@@ -13,12 +13,12 @@ import frc.robot.Constants.CANConstants;
 public class IndexerConstants {
     // CAN configs (Kraken X40)
     public static final int kMotorCANId = 42; // TODO: set real CAN ID
-    public static final CANBus kCANBus = CANConstants.kRioBus;
+    public static final CANBus kCANBus = CANConstants.kCANivoreBus;
 
     // Voltage and current limits
     public static final double kMaxVoltage = 12;
-    public static final double kSupplyCurrentLimit = 30;
-    public static final double kStatorCurrentLimit = 60;
+    public static final double kSupplyCurrentLimit = 40;
+    public static final double kStatorCurrentLimit = 70;
 
     public static final InvertedValue kInverted = InvertedValue.CounterClockwise_Positive; // TODO: confirm direction
     public static final NeutralModeValue kNeutralMode = NeutralModeValue.Brake;

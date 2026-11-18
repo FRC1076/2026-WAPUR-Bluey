@@ -9,7 +9,7 @@ public class LeftGrabberConstants {
     // CAN ID
     public static final int kMotorCANID = 31; // TODO: set this to the correct CAN ID (must be different from the right grabber's)
 
-    public static final InvertedValue kInverted = InvertedValue.Clockwise_Positive; //TODO check this.
+    public static final InvertedValue kInverted = InvertedValue.Clockwise_Positive; // TODO check this.
 
     public static final double kGearRatio = 1; // TODO: set this to the real gear ratio
 

@@ -30,6 +30,9 @@ import frc.robot.subsystems.grabber.left.LeftGrabberSubsystem;
 import frc.robot.subsystems.grabber.right.RightGrabberIODisabled;
 import frc.robot.subsystems.grabber.right.RightGrabberIOKraken;
 import frc.robot.subsystems.grabber.right.RightGrabberSubsystem;
+import frc.robot.subsystems.pickleballintake.PickleballIntakeIODisabled;
+import frc.robot.subsystems.pickleballintake.PickleballIntakeIOKraken;
+import frc.robot.subsystems.pickleballintake.PickleballIntakeSubsystem;
 import lib.hardware.hid.SamuraiPS5Controller;
 import lib.hardware.hid.SamuraiXboxController;
 import lib.vision.VisionLocalizationSystem;
@@ -57,6 +60,7 @@ public class RobotContainer {
     private final LeftGrabberSubsystem m_leftGrabber;
     private final RightGrabberSubsystem m_rightGrabber;
     private final ElevatorSubsystem m_elevator;
+    private final PickleballIntakeSubsystem m_pickleballIntake;
     private final IndexerSubsystem m_indexer;
     private final DrumSubsystem m_drum;
 
@@ -88,6 +92,7 @@ public class RobotContainer {
             m_leftGrabber = new LeftGrabberSubsystem(new LeftGrabberIOKraken());
             m_rightGrabber = new RightGrabberSubsystem(new RightGrabberIOKraken());
             m_elevator = new ElevatorSubsystem(new ElevatorIOKraken());
+            m_pickleballIntake = new PickleballIntakeSubsystem(new PickleballIntakeIOKraken());
             m_indexer = new IndexerSubsystem(new IndexerIOKraken());
             m_drum = new DrumSubsystem(new DrumIOKraken());
         } else {
@@ -100,6 +105,7 @@ public class RobotContainer {
             m_leftGrabber = new LeftGrabberSubsystem(new LeftGrabberIODisabled());
             m_rightGrabber = new RightGrabberSubsystem(new RightGrabberIODisabled());
             m_elevator = new ElevatorSubsystem(new ElevatorIODisabled());
+            m_pickleballIntake = new PickleballIntakeSubsystem(new PickleballIntakeIODisabled());
             m_indexer = new IndexerSubsystem(new IndexerIODisabled());
             m_drum = new DrumSubsystem(new DrumIODisabled());
         }

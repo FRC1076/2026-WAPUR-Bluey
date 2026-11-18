@@ -1,38 +1,27 @@
-package frc.robot.subsystems.grabber;
+package frc.robot.subsystems.grabber.left;
 
+import org.littletonrobotics.junction.AutoLog;
 
+public interface LeftGrabberIO {
 
-public interface GrabberIO {
-
-    public static class GrabberIOInputs {
-
-        /*  The Grabber has two independatly controlled motors
-            so we have variables for each */
-            
-        public double rightAppliedVolts;
-        public double leftAppliedVolts;
-
-        public double rightPostion;
-        public double leftPostion;
-
-        //RPS is radiens per second
-        public double rightRPS;
-        public double leftRPS;
-        
+    @AutoLog
+    public static class LeftGrabberIOInputs {
+        public double appliedVolts = 0;
+        public double currentAmps = 0;
+        public double positionRadians = 0;
+        public double velocityRadPerSec = 0;
+        public double motorTempDegC = 0;
     }
 
     // updates inputs for the grabber
-    public abstract void updateInputs(GrabberIOInputs inputs);
+    public abstract void updateInputs(LeftGrabberIOInputs inputs);
 
-    // changes voltage of motors
-    public abstract void rightRunVolts(double voltage);
-    public abstract void leftRunVolts(double voltage);
+    // changes voltage of the motor
+    public abstract void runVolts(double voltage);
 
-    // sets postion of the grabbers 
-    public abstract void rightSetPostion(double radiens);
-    public abstract void leftSetPostion(double radiens);
+    // sets postion of the grabber
+    public abstract void setPosition(double radians);
 
-    // sets velocity of the motors
-    public abstract void rightSetRPS(double radsPerSec);
-    public abstract void leftSetRPS(double radsPerSec);
+    // sets velocity of the motor
+    public abstract void setVelocity(double radPerSec);
 }

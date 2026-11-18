@@ -1,35 +1,60 @@
-package frc.robot.subsystems.grabber;
+package frc.robot.subsystems.grabber.left;
+
+import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.subsystems.grabber.GrabberIO.GrabberIOInputs;
+import frc.robot.subsystems.grabber.GrabberConstants;
 
-public class GrabberSubsystem extends SubsystemBase {
-    private final GrabberIO io;
-    private final GrabberIOInputs inputs = new GrabberIOInputs();
+public class LeftGrabberSubsystem extends SubsystemBase {
+    private final LeftGrabberIO io;
+    private final LeftGrabberIOInputsAutoLogged inputs = new LeftGrabberIOInputsAutoLogged();
 
-    public final Trigger leftVoltageApplied = new Trigger(() -> Math.abs(inputs.leftAppliedVolts) > 0.0);
-    public final Trigger rightVoltageApplied = new Trigger(() -> Math.abs(inputs.rightAppliedVolts) > 0.0);
+    public final Trigger voltageApplied =
+        new Trigger(() -> Math.abs(inputs.appliedVolts) > GrabberConstants.kVoltageAppliedThreshold);
 
-    public GrabberSubsystem(GrabberIO io) {
+    public LeftGrabberSubsystem(LeftGrabberIO io) {
         this.io = io;
     }
 
     @Override
     public void periodic() {
         io.updateInputs(inputs);
+        Logger.processInputs("LeftGrabber", inputs);
     }
 
-    private void applyVoltage(double leftVolts, double rightVolts) {
-        io.leftRunVolts(leftVolts);
-        io.rightRunVolts(rightVolts);
-    }
-
-    public Command setVoltage(double leftVolts, double rightVolts) {
+    /** Runs the grabber at the given voltage, and stops it when the command ends */
+    public Command setVoltage(double volts) {
         return startEnd(
-            () -> applyVoltage(leftVolts, rightVolts),
-            () -> applyVoltage(0.0, 0.0)
+            () -> io.runVolts(volts),
+            () -> io.runVolts(0.0)
         );
+    }
+
+    /** Runs the grabber at the given velocity, and stops it when the command ends */
+    public Command setVelocity(double radPerSec) {
+        return startEnd(
+            () -> io.setVelocity(radPerSec),
+            () -> io.runVolts(0.0)
+        );
+    }
+
+    /** Tells the grabber to go to (and hold) the given position */
+    public Command setPosition(double radians) {
+        return runOnce(() -> io.setPosition(radians));
+    }
+
+    /** Stops the grabber's motor */
+    public Command stop() {
+        return runOnce(() -> io.runVolts(0.0));
+    }
+
+    public double getPositionRadians() {
+        return inputs.positionRadians;
+    }
+
+    public double getVelocityRadPerSec() {
+        return inputs.velocityRadPerSec;
     }
 }

@@ -1,64 +1,33 @@
 package frc.robot.subsystems.grabber;
 
 import com.ctre.phoenix6.CANBus;
-import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import frc.robot.Constants.CANConstants;
 
+/**
+ * Constants shared by both the left and right grabber.
+ * Side-specific constants (CAN ID, inversion, gear ratio, PID) live in
+ * LeftGrabberConstants and RightGrabberConstants.
+ */
 public class GrabberConstants {
 
     // all constants are etheir made up or taken form refrence and are subject to change
-    
-    // CAN ID
-    public static final int kRightMotorCANID = 0; // TODO: set this to the correct CAN ID
-    public static final int kLeftMotorCANID = 0;
-    public static final CANBus kCANBus = CANConstants.kCANivoreBus;
 
-    public class RightControl {
-        //PID constants for right motor
-        public static final double kP = 0.0; // TODO: tune these values
-        public static final double kI = 0.0;
-        public static final double kD = 0.0;
-        public static final double kS = 0.0;
-        public static final double kV = 0.0;
-        public static final double kA = 0.0;
+    // CAN bus both grabber motors are on
+    public static final CANBus kCANBus = CANConstants.kCANivoreBus; // TODO: check if these are on the CANivore or the rio bus
 
-        public static final double kVelocityTimeFilterSecs = 0.0;
-    } 
-
-    public class LeftControl {
-        //PID constants for left motor 
-        public static final double kP = 0.0; // TODO: tune these values
-        public static final double kI = 0.0;
-        public static final double kD = 0.0;
-        public static final double kS = 0.0;
-        public static final double kV = 0.0;
-        public static final double kA = 0.0;
-
-        public static final double kVelocityTimeFilterSecs = 0.0;
-    }
-
-    //voltage compensation limits and current limits 
-    public static final double kVoltageCompensation = 12;
+    // current limits
     public static final double kSupplyCurrentLimit = 40;
     public static final double kStatorCurrentLimit = 70;
 
     public static final double kPeakForwardVoltage = 12; //TODO check this.
     public static final double kPeakReverseVoltage = -12;
 
-    public static final InvertedValue kRightInverted = InvertedValue.CounterClockwise_Positive; //TODO check this.
-    public static final InvertedValue kLeftInverted = InvertedValue.Clockwise_Positive;
-
     public static final NeutralModeValue kNeutralMode = NeutralModeValue.Brake;
-    
-    public static final int kLeftGearRatio = 1;
-    public static final int kRightGearRatio = 1;
 
     public static final boolean kUseFOC = true;
 
-
-
-
-
+    // Applied voltage above this counts as "the motor is running" for the voltageApplied triggers
+    public static final double kVoltageAppliedThreshold = 0.1;
 }

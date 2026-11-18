@@ -3,16 +3,6 @@ package frc.robot.subsystems.elevator;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface ElevatorIO {
-    public static record ElevatorControlConstants (
-        Double kP,
-        Double kI,
-        Double kD,
-        Double kS,
-        Double kG,
-        Double kV,
-        Double kA
-    ) {}
-
     @AutoLog
     public static class ElevatorIOInputs {
 

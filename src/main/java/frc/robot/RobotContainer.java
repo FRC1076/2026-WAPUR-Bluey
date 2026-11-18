@@ -15,6 +15,9 @@ import frc.robot.subsystems.drive.DriveIOHardware;
 import frc.robot.subsystems.drive.DriveIOSim;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.drive.TunerConstants;
+import frc.robot.subsystems.elevator.ElevatorIODisabled;
+import frc.robot.subsystems.elevator.ElevatorIOKraken;
+import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.grabber.left.LeftGrabberIODisabled;
 import frc.robot.subsystems.grabber.left.LeftGrabberIOKraken;
 import frc.robot.subsystems.grabber.left.LeftGrabberSubsystem;
@@ -47,6 +50,7 @@ public class RobotContainer {
     private final DriveSubsystem m_drive;
     private final LeftGrabberSubsystem m_leftGrabber;
     private final RightGrabberSubsystem m_rightGrabber;
+    private final ElevatorSubsystem m_elevator;
 
     private final VisionLocalizationSystem m_vision;
 
@@ -75,6 +79,7 @@ public class RobotContainer {
             );
             m_leftGrabber = new LeftGrabberSubsystem(new LeftGrabberIOKraken());
             m_rightGrabber = new RightGrabberSubsystem(new RightGrabberIOKraken());
+            m_elevator = new ElevatorSubsystem(new ElevatorIOKraken());
         } else {
             // The robot is not real. Use the disabled or simulation IO layers
             m_drive = new DriveSubsystem(
@@ -84,6 +89,7 @@ public class RobotContainer {
             );
             m_leftGrabber = new LeftGrabberSubsystem(new LeftGrabberIODisabled());
             m_rightGrabber = new RightGrabberSubsystem(new RightGrabberIODisabled());
+            m_elevator = new ElevatorSubsystem(new ElevatorIODisabled());
         }
 
         teleopDriveCommand = new TeleopDriveCommand(

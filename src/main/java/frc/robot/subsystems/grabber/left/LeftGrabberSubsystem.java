@@ -25,7 +25,7 @@ public class LeftGrabberSubsystem extends SubsystemBase {
     }
 
     /** Runs the grabber at the given voltage, and stops it when the command ends */
-    public Command setVoltage(double volts) {
+    public Command runVoltage(double volts) {
         return startEnd(
             () -> io.runVolts(volts),
             () -> io.runVolts(0.0)
@@ -33,7 +33,7 @@ public class LeftGrabberSubsystem extends SubsystemBase {
     }
 
     /** Runs the grabber at the given velocity, and stops it when the command ends */
-    public Command setVelocity(double radPerSec) {
+    public Command runVelocity(double radPerSec) {
         return startEnd(
             () -> io.setVelocity(radPerSec),
             () -> io.runVolts(0.0)
@@ -41,18 +41,18 @@ public class LeftGrabberSubsystem extends SubsystemBase {
     }
 
     /** Tells the grabber to go to (and hold) the given position */
-    public Command setPosition(double radians) {
+    public Command applyPosition(double radians) {
         return runOnce(() -> io.setPosition(radians));
     }
 
     /** Runs the grabber inward while held, and stops it when released */
     public Command intake() {
-        return setVoltage(GrabberConstants.kIntakeVolts);
+        return runVoltage(GrabberConstants.kIntakeVolts);
     }
 
     /** Runs the grabber outward while held, and stops it when released */
     public Command outtake() {
-        return setVoltage(GrabberConstants.kOuttakeVolts);
+        return runVoltage(GrabberConstants.kOuttakeVolts);
     }
 
     /** Stops the grabber's motor */

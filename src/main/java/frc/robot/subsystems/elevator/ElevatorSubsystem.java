@@ -64,7 +64,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         return inputs.statorCurrentAmps;
     }
 
-    public Command setVoltage(double volts) {
+    public Command applyVoltage(double volts) {
         return Commands.runOnce(
             () -> io.setVoltage(volts),
             this
@@ -72,7 +72,7 @@ public class ElevatorSubsystem extends SubsystemBase{
     }
 
     /** Tells the elevator to go to (and hold) the given height */
-    public Command setPosition(double meters) {
+    public Command applyPosition(double meters) {
         return Commands.runOnce(
             () -> {
                 m_targetMeters = MathUtil.clamp(meters, ElevatorConstants.kBackwardPositionLimit, ElevatorConstants.kForwardPositionLimit);
@@ -96,17 +96,17 @@ public class ElevatorSubsystem extends SubsystemBase{
             DriverStation.reportError("Tried to set the elevator to an invalid level. Applying level one instead.", true);
         }
 
-        return setPosition(height);
+        return applyPosition(height);
     }
 
     /** Moves the elevator target up by one increment */
     public Command incrementUp() {
-        return Commands.defer(() -> setPosition(m_targetMeters + ElevatorConstants.kIncrementMeters), Set.of(this));
+        return Commands.defer(() -> applyPosition(m_targetMeters + ElevatorConstants.kIncrementMeters), Set.of(this));
     }
 
     /** Moves the elevator target down by one increment */
     public Command incrementDown() {
-        return Commands.defer(() -> setPosition(m_targetMeters - ElevatorConstants.kIncrementMeters), Set.of(this));
+        return Commands.defer(() -> applyPosition(m_targetMeters - ElevatorConstants.kIncrementMeters), Set.of(this));
     }
 
     /** The height the elevator was last told to go to */
@@ -115,7 +115,7 @@ public class ElevatorSubsystem extends SubsystemBase{
     }
 
     public Command stop() {
-        return setVoltage(0);
+        return applyVoltage(0);
     }
 
     public Command sysIdQuasistatic(Direction direction) {

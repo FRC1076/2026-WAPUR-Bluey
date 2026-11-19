@@ -9,6 +9,7 @@ import org.littletonrobotics.junction.Logger;
 import java.util.Set;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -88,8 +89,13 @@ public class ElevatorSubsystem extends SubsystemBase{
             case 2 -> ElevatorConstants.kLevel2HeightMeters;
             case 3 -> ElevatorConstants.kLevel3HeightMeters;
             case 4 -> ElevatorConstants.kLevel4HeightMeters;
-            default -> throw new IllegalArgumentException("Elevator level must be 1-4, got " + level);
+            default -> ElevatorConstants.kLevel1HeightMeters;
         };
+
+        if (level > 4 || level < 1) {
+            DriverStation.reportError("Tried to set the elevator to an invalid level. Applying level one instead.", true);
+        }
+
         return setPosition(height);
     }
 
